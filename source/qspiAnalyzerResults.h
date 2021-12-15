@@ -3,6 +3,8 @@
 
 #include <AnalyzerResults.h>
 
+#define QUADSPI_ERROR_FLAG ( 1 << 0 )
+
 class qspiAnalyzer;
 class qspiAnalyzerSettings;
 

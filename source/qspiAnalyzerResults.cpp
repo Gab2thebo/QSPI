@@ -21,9 +21,17 @@ void qspiAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& channel,
 	ClearResultStrings();
 	Frame frame = GetFrame( frame_index );
 
-	char number_str[128];
-	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-	AddResultString( number_str );
+	if( ( frame.mFlags & QUADSPI_ERROR_FLAG ) == 0 ) {
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+		AddResultString( number_str );
+	}else 
+	{
+		AddResultString( "Error" );
+		AddResultString( "Settings mismatch" );
+		AddResultString( "The initial (idle) state of the CLK line does not match the settings." );
+	}
+
 }
 
 void qspiAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id )
