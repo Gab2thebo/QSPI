@@ -2,12 +2,19 @@
 #include "qspiAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
 
+//enum QuadSpiBubbleType { QuadSpiData, QuadSpiError };
 qspiAnalyzer::qspiAnalyzer()
 :	Analyzer2(),  
 	mSettings( new qspiAnalyzerSettings() ),
 	mSimulationInitilized( false )
 {
 	SetAnalyzerSettings( mSettings.get() );
+	mData0( NULL ),
+	mData1( NULL ),
+	mData2( NULL ),
+	mData3( NULL ),
+	mClock( NULL ),
+	mEnable( NULL )
 }
 
 qspiAnalyzer::~qspiAnalyzer()
@@ -19,7 +26,7 @@ void qspiAnalyzer::SetupResults()
 {
 	mResults.reset( new qspiAnalyzerResults( this, mSettings.get() ) );
 	SetAnalyzerResults( mResults.get() );
-	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
+	mResults->AddChannelBubblesWillAppearOn( mSettings->mData0Channel );
 }
 
 void qspiAnalyzer::WorkerThread()

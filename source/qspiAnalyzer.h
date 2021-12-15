@@ -21,6 +21,16 @@ public:
 	virtual const char* GetAnalyzerName() const;
 	virtual bool NeedsRerun();
 
+protected: //functions
+	void Setup();
+	void AdvanceToActiveEnableEdge();
+	bool IsInitialClockPolarityCorrect();
+	void AdvanceToActiveEnableEdgeWithCorrectClockPolarity();
+	bool WouldAdvancingTheClockToggleEnable();
+	void GetWord();
+
+#pragma warning( push )
+#pragma warning( disable : 4251 ) //warning C4251: 'SerialAnalyzer::<...>' : class <...> needs to have dll-interface to be used by clients of class
 protected: //vars
 	std::auto_ptr< qspiAnalyzerSettings > mSettings;
 	std::auto_ptr< qspiAnalyzerResults > mResults;
@@ -29,10 +39,18 @@ protected: //vars
 	qspiSimulationDataGenerator mSimulationDataGenerator;
 	bool mSimulationInitilized;
 
-	//Serial analysis vars:
-	U32 mSampleRateHz;
-	U32 mStartOfStopBitOffset;
-	U32 mEndOfStopBitOffset;
+	AnalyzerChannelData* mData0; 
+	AnalyzerChannelData* mData1; 
+	AnalyzerChannelData* mData2; 
+	AnalyzerChannelData* mData3;
+	AnalyzerChannelData* mClock;
+	AnalyzerChannelData* mEnable;
+
+	U64 mCurrentSample;
+	AnalyzerResults::MarkerType mArrowMarker;
+	std::vector<U64> mArrowLocations;
+
+#pragma warning( pop )
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();
