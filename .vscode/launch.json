@@ -28,9 +28,9 @@
         ""
       ],
       "stopAtEntry": false,
-      "cwd": "/home/gab/git/Logic Analyser Extensions/QSPI/source",
+      "cwd": "/home/gab/git/Logic-Analyser-Extensions/QSPI/source",
       "environment": [],
-      "program": "/home/gab/git/Logic Analyser Extensions/QSPI/source/build/Debug/outDebug",
+      "program": "/home/gab/git/Logic-Analyser-Extensions/QSPI/source/build/Release/outRelease",
       "internalConsoleOptions": "openOnSessionStart",
       "MIMode": "gdb",
       "miDebuggerPath": "/usr/bin/gdb",

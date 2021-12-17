@@ -161,6 +161,11 @@ void qspiAnalyzer::GetWord()
 		}
 	}
 
+	//save the resuls:
+	U32 count = mArrowLocations.size();
+	for( U32 i=0; i<count; i++ )
+		mResults->AddMarker( mArrowLocations[i], mArrowMarker, mSettings->mClockChannel );
+		
 	Frame result_frame;
 	// result_frame.mStartingSampleInclusive = first_sample;
 	result_frame.mEndingSampleInclusive = mClock->GetSampleNumber();
