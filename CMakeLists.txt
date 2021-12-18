@@ -13,8 +13,10 @@ source/qspiAnalyzerResults.cpp
 source/qspiAnalyzerResults.h
 source/qspiAnalyzerSettings.cpp
 source/qspiAnalyzerSettings.h
-source/qspiSimulationDataGenerator.cpp
-source/qspiSimulationDataGenerator.h
+source/qspiAnalyzerCommands.cpp 
+source/qspiAnalyzerCommands.h 
+# source/qspiSimulationDataGenerator.cpp
+# source/qspiSimulationDataGenerator.h
 )
 
 add_analyzer_plugin(qspi_analyzer SOURCES ${SOURCES})

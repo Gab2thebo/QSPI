@@ -10,11 +10,10 @@ qspiAnalyzerSettings::qspiAnalyzerSettings()
 	mData3Channel( UNDEFINED_CHANNEL ),
 	mClockChannel( UNDEFINED_CHANNEL ),
 	mEnableChannel( UNDEFINED_CHANNEL ),
-	mShiftOrder( AnalyzerEnums::MsbFirst ),
-	mBitsPerTransfer( 8 ),
-	mClockInactiveState( BIT_LOW ),
-	mDataValidEdge( AnalyzerEnums::LeadingEdge ), 
-	mEnableActiveState( BIT_LOW )
+	mClockInactiveState(BIT_LOW),
+	mModeState(3),
+	mDummyCycles(0),
+	mAddressSize(0)
 {
 	mData0ChannelInterface.reset( new AnalyzerSettingInterfaceChannel());
 	mData0ChannelInterface->SetTitleAndTooltip( "Data 0", "Data line 0" );
@@ -45,68 +44,64 @@ qspiAnalyzerSettings::qspiAnalyzerSettings()
 	mEnableChannelInterface->SetChannel( mEnableChannel );
 	mEnableChannelInterface->SetSelectionOfNoneIsAllowed( true );
 
-	mShiftOrderInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mShiftOrderInterface->SetTitleAndTooltip( "Significant Bit", "" );
-	mShiftOrderInterface->AddNumber( AnalyzerEnums::MsbFirst, "Most Significant Bit First (Standard)", "Select if the most significant bit or least significant bit is transmitted first" );
-	mShiftOrderInterface->AddNumber( AnalyzerEnums::LsbFirst, "Least Significant Bit First", "" );
-	mShiftOrderInterface->SetNumber( mShiftOrder );
+	mClockInactiveStateInterface.reset(new AnalyzerSettingInterfaceNumberList());
+	mClockInactiveStateInterface->SetTitleAndTooltip("Clock Polarity", "");
+	mClockInactiveStateInterface->AddNumber(BIT_LOW, "Clock is Low when inactive (CPOL = 0, CPHA = 0)", "CPOL = 0 (Clock Polarity), CPHA = 0 (Clock Phase)");
+	mClockInactiveStateInterface->AddNumber(BIT_HIGH, "Clock is High when inactive (CPOL = 1, CPHA = 1)", "CPOL = 1 (Clock Polarity), CPHA = 1 (Clock Phase)");
+	mClockInactiveStateInterface->SetNumber(mClockInactiveState);
 
-	mBitsPerTransferInterface->SetTitleAndTooltip( "Bits per Transfer", "" );
-	for( U32 i=1; i<=64; i++ )
+	mModeStateInterface.reset(new AnalyzerSettingInterfaceNumberList());
+	mModeStateInterface->SetTitleAndTooltip("SPI Mode", "");
+	mModeStateInterface->AddNumber(1, "Extended", "Extended mode (uses DQ0 for command and DQ[3:0] to data depending on command)");
+	mModeStateInterface->AddNumber(2, "Dual", "Dual mode (uses DQ[1:0])");
+	mModeStateInterface->AddNumber(3, "Quad", "Quad mode (uses DQ[3:0])");
+	mModeStateInterface->SetNumber(mModeState);
+
+	mDummyCyclesInterface.reset(new AnalyzerSettingInterfaceNumberList());
+	mDummyCyclesInterface->SetTitleAndTooltip("# Dummy Clock Cycles", "");
+	for (U32 i = 0; i <= 15; i++)
 	{
 		std::stringstream ss;
 
-		if( i == 8 )
-			ss << "8 Bits per Transfer (Standard)";
-		else
-			ss << i << " Bits per Transfer";
-		
-		mBitsPerTransferInterface->AddNumber( i, ss.str().c_str(), "" );
+		ss << i;
+
+		mDummyCyclesInterface->AddNumber(i, ss.str().c_str(), "");
 	}
-	mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
+	mDummyCyclesInterface->SetNumber(mDummyCycles);
 
-	mClockInactiveStateInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mClockInactiveStateInterface->SetTitleAndTooltip( "Clock State", "" );
-	mClockInactiveStateInterface->AddNumber( BIT_LOW, "Clock is Low when inactive (CPOL = 0)", "CPOL = 0 (Clock Polarity)" );
-	mClockInactiveStateInterface->AddNumber( BIT_HIGH, "Clock is High when inactive (CPOL = 1)", "CPOL = 1 (Clock Polarity)" );
-	mClockInactiveStateInterface->SetNumber( mClockInactiveState );
+	mAddressSizeInterface.reset(new AnalyzerSettingInterfaceNumberList());
+	mAddressSizeInterface->SetTitleAndTooltip("Address Size (bytes)", "");
+	mAddressSizeInterface->AddNumber(0, "None", "no address phase");
+	mAddressSizeInterface->AddNumber(1, "One", "one byte addresses");
+	mAddressSizeInterface->AddNumber(2, "Two", "two byte addresses");
+	mAddressSizeInterface->AddNumber(3, "Three", "three byte addresses");
+	mAddressSizeInterface->AddNumber(4, "Four", "four byte addresses");
+	mAddressSizeInterface->SetNumber(mAddressSize);
 
-	mDataValidEdgeInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mDataValidEdgeInterface->SetTitleAndTooltip( "Clock Phase", "" );
-	mDataValidEdgeInterface->AddNumber( AnalyzerEnums::LeadingEdge, "Data is Valid on Clock Leading Edge (CPHA = 0)", "CPHA = 0 (Clock Phase)" );
-	mDataValidEdgeInterface->AddNumber( AnalyzerEnums::TrailingEdge, "Data is Valid on Clock Trailing Edge (CPHA = 1)", "CPHA = 1 (Clock Phase)" );
-	mDataValidEdgeInterface->SetNumber( mDataValidEdge );
 
-	mEnableActiveStateInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mEnableActiveStateInterface->SetTitleAndTooltip( "Enable Line", "" );
-	mEnableActiveStateInterface->AddNumber( BIT_LOW, "Enable line is Active Low (Standard)", "" );
-	mEnableActiveStateInterface->AddNumber( BIT_HIGH, "Enable line is Active High", "" );
-	mEnableActiveStateInterface->SetNumber( mEnableActiveState );
+	AddInterface(mEnableChannelInterface.get());
+	AddInterface(mClockChannelInterface.get());
+	AddInterface(mData0ChannelInterface.get());
+	AddInterface(mData1ChannelInterface.get());
+	AddInterface(mData2ChannelInterface.get());
+	AddInterface(mData3ChannelInterface.get());
+	AddInterface(mClockInactiveStateInterface.get());
+	AddInterface(mModeStateInterface.get());
+	AddInterface(mDummyCyclesInterface.get());
+	AddInterface(mAddressSizeInterface.get());
 
-	AddInterface( mData0ChannelInterface.get() );
-	AddInterface( mData1ChannelInterface.get() );
-	AddInterface( mData2ChannelInterface.get() );
-	AddInterface( mData3ChannelInterface.get() );
-	AddInterface( mClockChannelInterface.get() );
-	AddInterface( mEnableChannelInterface.get() );
-	AddInterface( mShiftOrderInterface.get() );
-	AddInterface( mBitsPerTransferInterface.get() );
-	AddInterface( mClockInactiveStateInterface.get() );
-	AddInterface( mDataValidEdgeInterface.get() );
-	AddInterface( mEnableActiveStateInterface.get() );
 
-	//AddExportOption( 0, "Export as text/csv file", "text (*.txt);;csv (*.csv)" );
 	AddExportOption( 0, "Export as text/csv file" );
 	AddExportExtension( 0, "text", "txt" );
 	AddExportExtension( 0, "csv", "csv" );
 
 	ClearChannels();
-	AddChannel( mData0Channel, "Data 0", false );
-	AddChannel( mData1Channel, "Data 1", false );
-	AddChannel( mData2Channel, "Data 2", false );
-	AddChannel( mData3Channel, "Data 3", false );
-	AddChannel( mClockChannel, "CLOCK", false );
-	AddChannel( mEnableChannel, "ENABLE", false );
+	AddChannel(mEnableChannel, "CS", false);
+	AddChannel(mClockChannel, "CLK", false);
+	AddChannel(mData0Channel, "D0", false);
+	AddChannel(mData1Channel, "D1", false);
+	AddChannel(mData2Channel, "D2", false);
+	AddChannel(mData3Channel, "D3", false);
 }
 
 qspiAnalyzerSettings::~qspiAnalyzerSettings()
@@ -149,11 +144,10 @@ bool qspiAnalyzerSettings::SetSettingsFromInterfaces()
 	mClockChannel = mClockChannelInterface->GetChannel();
 	mEnableChannel = mEnableChannelInterface->GetChannel();
 
-	mShiftOrder =			(AnalyzerEnums::ShiftOrder) U32( mShiftOrderInterface->GetNumber() );
-	mBitsPerTransfer =		U32( mBitsPerTransferInterface->GetNumber() );
-	mClockInactiveState =	(BitState) U32( mClockInactiveStateInterface->GetNumber() );
-	mDataValidEdge =		(AnalyzerEnums::Edge)  U32( mDataValidEdgeInterface->GetNumber() );
-	mEnableActiveState =	(BitState) U32( mEnableActiveStateInterface->GetNumber() );
+	mClockInactiveState = (BitState) U32(mClockInactiveStateInterface->GetNumber());
+	mModeState = U32(mModeStateInterface->GetNumber());
+	mDummyCycles = U32(mDummyCyclesInterface->GetNumber());
+	mAddressSize = U32(mAddressSizeInterface->GetNumber());
 
 	ClearChannels();
 	AddChannel( mData0Channel, "Data 0", mData0Channel != UNDEFINED_CHANNEL );
@@ -174,11 +168,10 @@ void qspiAnalyzerSettings::UpdateInterfacesFromSettings()
 	mData3ChannelInterface->SetChannel( mData3Channel );
 	mClockChannelInterface->SetChannel( mClockChannel );
 	mEnableChannelInterface->SetChannel( mEnableChannel );
-	mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
-	mShiftOrderInterface->SetNumber( mShiftOrder );
-	mDataValidEdgeInterface->SetNumber( mDataValidEdge );
-	mClockInactiveStateInterface->SetNumber( mClockInactiveState );
-	mDataValidEdgeInterface->SetNumber( mDataValidEdge );
+	mClockInactiveStateInterface->SetNumber(mClockInactiveState);
+	mModeStateInterface->SetNumber(mModeState);
+	mDummyCyclesInterface->SetNumber(mDummyCycles);
+	mAddressSizeInterface->SetNumber(mAddressSize);
 }
 
 void qspiAnalyzerSettings::LoadSettings( const char* settings )
@@ -197,11 +190,10 @@ void qspiAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive >>  mData3Channel;
 	text_archive >>  mClockChannel;
 	text_archive >>  mEnableChannel;
-	text_archive >>  *(U32*)&mShiftOrder;
-	text_archive >>  mBitsPerTransfer;
-	text_archive >>  *(U32*)&mClockInactiveState;
-	text_archive >>  *(U32*)&mDataValidEdge;
-	text_archive >>  *(U32*)&mEnableActiveState;
+	text_archive >> *(U32*)&mClockInactiveState;
+	text_archive >> *(U32*)&mModeState;
+	text_archive >> *(U32*)&mDummyCycles;
+	text_archive >> *(U32*)&mAddressSize;
 
 	//bool success = text_archive >> mUsePackets;  //new paramater added -- do this for backwards compatibility
 	//if( success == false )
@@ -223,17 +215,16 @@ const char* qspiAnalyzerSettings::SaveSettings()
 	SimpleArchive text_archive;
 
 	text_archive << "SaleaeQuadSpiAnalyzer";
-	text_archive <<  mData0Channel;
-	text_archive <<  mData1Channel;
-	text_archive <<  mData2Channel;
-	text_archive <<  mData3Channel;
-	text_archive <<  mClockChannel;
-	text_archive <<  mEnableChannel;
-	text_archive <<  mShiftOrder;
-	text_archive <<  mBitsPerTransfer;
-	text_archive <<  mClockInactiveState;
-	text_archive <<  mDataValidEdge;
-	text_archive <<  mEnableActiveState;
+	text_archive << mData0Channel;
+	text_archive << mData1Channel;
+	text_archive << mData2Channel;
+	text_archive << mData3Channel;
+	text_archive << mClockChannel;
+	text_archive << mEnableChannel;
+	text_archive << mClockInactiveState;
+	text_archive << mModeState;
+	text_archive << mDummyCycles;
+	text_archive << mAddressSize;
 
 	return SetReturnString( text_archive.GetString() );
 }

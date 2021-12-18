@@ -3,7 +3,6 @@
 
 #include <Analyzer.h>
 #include "qspiAnalyzerResults.h"
-#include "qspiSimulationDataGenerator.h"
 
 class qspiAnalyzerSettings;
 class ANALYZER_EXPORT qspiAnalyzer : public Analyzer2
@@ -21,22 +20,14 @@ public:
 	virtual const char* GetAnalyzerName() const;
 	virtual bool NeedsRerun();
 
-protected: //functions
-	void Setup();
-	void AdvanceToActiveEnableEdge();
-	bool IsInitialClockPolarityCorrect();
-	void AdvanceToActiveEnableEdgeWithCorrectClockPolarity();
-	bool WouldAdvancingTheClockToggleEnable();
-	void GetWord();
-
 #pragma warning( push )
 #pragma warning( disable : 4251 ) //warning C4251: 'SerialAnalyzer::<...>' : class <...> needs to have dll-interface to be used by clients of class
+
 protected: //vars
 	std::unique_ptr< qspiAnalyzerSettings > mSettings;
 	std::unique_ptr< qspiAnalyzerResults > mResults;
 	AnalyzerChannelData* mSerial;
 
-	qspiSimulationDataGenerator mSimulationDataGenerator;
 	bool mSimulationInitilized;
 
 	AnalyzerChannelData* mData0; 
@@ -49,6 +40,27 @@ protected: //vars
 	U64 mCurrentSample;
 	AnalyzerResults::MarkerType mArrowMarker;
 	std::vector<U64> mArrowLocations;
+
+	struct ParseResult {
+		S64 start;
+		S64 end;
+		U64 data;
+	};
+
+protected: //functions
+	void Setup();
+	void AdvanceToActiveEnableEdge();
+	bool IsInitialClockPolarityCorrect();
+	void AdvanceToActiveEnableEdgeWithCorrectClockPolarity();
+	bool WouldAdvancingTheClockToggleEnable();
+	bool IsParseResultError(qspiAnalyzer::ParseResult result);
+	void GetFrame();
+	ParseResult GetCommand(U64 CommandLineMask);
+	void SaveResults(qspiAnalyzer::ParseResult return_value, QSPIFrameType frame_type);
+
+	ParseResult GetAddress(U64 AddressLineMask);
+	ParseResult GetDummy();
+	ParseResult GetData(U64 DataLineMask);
 
 #pragma warning( pop )
 };

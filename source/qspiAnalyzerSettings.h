@@ -22,11 +22,11 @@ public:
 	Channel mData3Channel;
 	Channel mClockChannel;
 	Channel mEnableChannel;
-	AnalyzerEnums::ShiftOrder mShiftOrder;
-	U32 mBitsPerTransfer;
 	BitState mClockInactiveState;
-	AnalyzerEnums::Edge mDataValidEdge;
-	BitState mEnableActiveState;
+	U32 mModeState;
+	U32 mDummyCycles;
+	U32 mAddressSize;
+
 
 protected:
 	std::unique_ptr< AnalyzerSettingInterfaceChannel >	mData0ChannelInterface;
@@ -35,11 +35,10 @@ protected:
 	std::unique_ptr< AnalyzerSettingInterfaceChannel >	mData3ChannelInterface;
 	std::unique_ptr< AnalyzerSettingInterfaceChannel >	mClockChannelInterface;
 	std::unique_ptr< AnalyzerSettingInterfaceChannel >	mEnableChannelInterface;
-	std::unique_ptr< AnalyzerSettingInterfaceNumberList > mShiftOrderInterface;
-	std::unique_ptr< AnalyzerSettingInterfaceNumberList > mBitsPerTransferInterface;
-	std::unique_ptr< AnalyzerSettingInterfaceNumberList > mClockInactiveStateInterface;
-	std::unique_ptr< AnalyzerSettingInterfaceNumberList > mDataValidEdgeInterface;
-	std::unique_ptr< AnalyzerSettingInterfaceNumberList > mEnableActiveStateInterface;
+	std::unique_ptr< AnalyzerSettingInterfaceNumberList >	mClockInactiveStateInterface;
+	std::unique_ptr< AnalyzerSettingInterfaceNumberList >	mModeStateInterface;
+	std::unique_ptr< AnalyzerSettingInterfaceNumberList >	mDummyCyclesInterface;
+	std::unique_ptr< AnalyzerSettingInterfaceNumberList >	mAddressSizeInterface;
 };
 
 #endif //QSPI_ANALYZER_SETTINGS

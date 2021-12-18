@@ -3,7 +3,7 @@
 #include "qspiAnalyzer.h"
 #include "qspiAnalyzerSettings.h"
 #include <iostream>
-#include <fstream>
+#include <sstream>
 
 qspiAnalyzerResults::qspiAnalyzerResults( qspiAnalyzer* analyzer, qspiAnalyzerSettings* settings )
 :	AnalyzerResults(),
@@ -12,38 +12,96 @@ qspiAnalyzerResults::qspiAnalyzerResults( qspiAnalyzer* analyzer, qspiAnalyzerSe
 {
 }
 
+
 qspiAnalyzerResults::~qspiAnalyzerResults()
 {
 }
 
+
 void qspiAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& channel, DisplayBase display_base )
 {
+
 	ClearResultStrings();
 	Frame frame = GetFrame( frame_index );
 
-	if( ( frame.mFlags & QUADSPI_ERROR_FLAG ) == 0 ) {
-		char number_str[128];
-		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-		AddResultString( number_str );
-	}else 
+	switch (frame.mType)
 	{
-		AddResultString( "Error" );
-		AddResultString( "Settings mismatch" );
-		AddResultString( "The initial (idle) state of the CLK line does not match the settings." );
+	case FrameTypeCommand:
+		{
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
+
+		AddResultString(number_str);
+
+		std::stringstream ss;
+		ss << "Cmd: " << number_str;
+		AddResultString(ss.str().c_str());
+		ss.str("");
+
+		// ss << "Command: " << number_str << " " << GetQSPICommandAttr(frame.mData1).CommandName;
+		AddResultString(ss.str().c_str());
+		}
+		break;
+	case FrameTypeAddress:
+	{
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
+
+		AddResultString(number_str);
+
+		std::stringstream ss;
+		ss << "Addr: " << number_str;
+		AddResultString(ss.str().c_str());
+		ss.str("");
+
+		ss << "Address: " << number_str;
+		AddResultString(ss.str().c_str());
+	}
+	case FrameTypeDummy:
+	{
+		std::stringstream ss;
+		ss << "Dummy";
+		AddResultString(ss.str().c_str());
+		ss.str("");
+
+		ss << "Dummy Cycles";
+		AddResultString(ss.str().c_str());
+	}
+	case FrameTypeData:
+	{
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
+
+		AddResultString(number_str);
+
+		std::stringstream ss;
+		ss << "Data: " << number_str;
+		AddResultString(ss.str().c_str());
+		ss.str("");
+
+		ss << "Data: " << number_str;
+		AddResultString(ss.str().c_str());
+	}
+	break;
+
+	default:
+		break;
 	}
 
 }
 
 void qspiAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id )
 {
-	std::ofstream file_stream( file, std::ios::out );
+	std::stringstream ss;
 
 	U64 trigger_sample = mAnalyzer->GetTriggerSample();
 	U32 sample_rate = mAnalyzer->GetSampleRate();
-
-	file_stream << "Time [s],Value" << std::endl;
-
 	U64 num_frames = GetNumFrames();
+
+	void* f = AnalyzerHelpers::StartFile(file);
+
+	ss << "Time [s],Value" << std::endl;
+
 	for( U32 i=0; i < num_frames; i++ )
 	{
 		Frame frame = GetFrame( i );
@@ -54,37 +112,85 @@ void qspiAnalyzerResults::GenerateExportFile( const char* file, DisplayBase disp
 		char number_str[128];
 		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
 
-		file_stream << time_str << "," << number_str << std::endl;
+		ss << time_str << "," << number_str << std::endl;
+
+		AnalyzerHelpers::AppendToFile((U8*)ss.str().c_str(), ss.str().length(), f);
+		ss.str(std::string());
 
 		if( UpdateExportProgressAndCheckForCancel( i, num_frames ) == true )
 		{
-			file_stream.close();
+			AnalyzerHelpers::EndFile(f);
 			return;
 		}
 	}
 
-	file_stream.close();
+	UpdateExportProgressAndCheckForCancel(num_frames, num_frames);
+	AnalyzerHelpers::EndFile(f);
 }
 
 void qspiAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
 {
-#ifdef SUPPORTS_PROTOCOL_SEARCH
-	Frame frame = GetFrame( frame_index );
 	ClearTabularText();
+	Frame frame = GetFrame( frame_index );
+	
+	switch (frame.mType)
+	{
+	case FrameTypeCommand:
+	{
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
 
-	char number_str[128];
-	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-	AddTabularText( number_str );
-#endif
+		std::stringstream ss;
+
+		// ss << "Command: " << number_str << " " << GetQSPICommandAttr(frame.mData1).CommandName;
+		// AddTabularText(ss.str().c_str());
+		break;
+	}
+	case FrameTypeAddress:
+	{
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
+
+		std::stringstream ss;
+
+		ss << "Address: " << number_str;
+		AddTabularText(ss.str().c_str());
+		break;
+	}
+	case FrameTypeDummy:
+	{
+		std::stringstream ss;
+
+		ss << "Dummy Cycles";
+		AddTabularText(ss.str().c_str());
+		break;
+	}
+	case FrameTypeData:
+	{
+		char number_str[128];
+		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
+
+		// std::stringstream ss;
+
+		// ss << "Data: " << number_str;
+		// AddTabularText(ss.str().c_str());
+		break;
+	}
+
+	default:
+		break;
+	}
+
 }
 
 void qspiAnalyzerResults::GeneratePacketTabularText( U64 packet_id, DisplayBase display_base )
 {
-	//not supported
-
+	ClearResultStrings();
+	AddResultString( "not supported" );
 }
 
 void qspiAnalyzerResults::GenerateTransactionTabularText( U64 transaction_id, DisplayBase display_base )
 {
-	//not supported
+	ClearResultStrings();
+	AddResultString( "not supported" );
 }

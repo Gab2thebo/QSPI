@@ -5,6 +5,8 @@
 
 #define QUADSPI_ERROR_FLAG ( 1 << 0 )
 
+enum QSPIFrameType { FrameTypeCommand, FrameTypeAddress, FrameTypeAlt, FrameTypeDummy, FrameTypeData };
+
 class qspiAnalyzer;
 class qspiAnalyzerSettings;
 
