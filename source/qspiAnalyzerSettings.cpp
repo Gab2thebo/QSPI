@@ -11,7 +11,6 @@ qspiAnalyzerSettings::qspiAnalyzerSettings()
 	mClockChannel( UNDEFINED_CHANNEL ),
 	mEnableChannel( UNDEFINED_CHANNEL ),
 	mClockInactiveState(BIT_LOW),
-	mModeState(3),
 	mDummyCycles(0),
 	mAddressSize(0)
 {
@@ -50,16 +49,9 @@ qspiAnalyzerSettings::qspiAnalyzerSettings()
 	mClockInactiveStateInterface->AddNumber(BIT_HIGH, "Clock is High when inactive (CPOL = 1, CPHA = 1)", "CPOL = 1 (Clock Polarity), CPHA = 1 (Clock Phase)");
 	mClockInactiveStateInterface->SetNumber(mClockInactiveState);
 
-	mModeStateInterface.reset(new AnalyzerSettingInterfaceNumberList());
-	mModeStateInterface->SetTitleAndTooltip("SPI Mode", "");
-	mModeStateInterface->AddNumber(1, "Extended", "Extended mode (uses DQ0 for command and DQ[3:0] to data depending on command)");
-	mModeStateInterface->AddNumber(2, "Dual", "Dual mode (uses DQ[1:0])");
-	mModeStateInterface->AddNumber(3, "Quad", "Quad mode (uses DQ[3:0])");
-	mModeStateInterface->SetNumber(mModeState);
-
 	mDummyCyclesInterface.reset(new AnalyzerSettingInterfaceNumberList());
 	mDummyCyclesInterface->SetTitleAndTooltip("# Dummy Clock Cycles", "");
-	for (U32 i = 0; i <= 15; i++)
+	for (U32 i = 0; i <= 7; i++)
 	{
 		std::stringstream ss;
 
@@ -86,7 +78,6 @@ qspiAnalyzerSettings::qspiAnalyzerSettings()
 	AddInterface(mData2ChannelInterface.get());
 	AddInterface(mData3ChannelInterface.get());
 	AddInterface(mClockInactiveStateInterface.get());
-	AddInterface(mModeStateInterface.get());
 	AddInterface(mDummyCyclesInterface.get());
 	AddInterface(mAddressSizeInterface.get());
 
@@ -145,7 +136,6 @@ bool qspiAnalyzerSettings::SetSettingsFromInterfaces()
 	mEnableChannel = mEnableChannelInterface->GetChannel();
 
 	mClockInactiveState = (BitState) U32(mClockInactiveStateInterface->GetNumber());
-	mModeState = U32(mModeStateInterface->GetNumber());
 	mDummyCycles = U32(mDummyCyclesInterface->GetNumber());
 	mAddressSize = U32(mAddressSizeInterface->GetNumber());
 
@@ -169,7 +159,6 @@ void qspiAnalyzerSettings::UpdateInterfacesFromSettings()
 	mClockChannelInterface->SetChannel( mClockChannel );
 	mEnableChannelInterface->SetChannel( mEnableChannel );
 	mClockInactiveStateInterface->SetNumber(mClockInactiveState);
-	mModeStateInterface->SetNumber(mModeState);
 	mDummyCyclesInterface->SetNumber(mDummyCycles);
 	mAddressSizeInterface->SetNumber(mAddressSize);
 }
@@ -191,7 +180,6 @@ void qspiAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive >>  mClockChannel;
 	text_archive >>  mEnableChannel;
 	text_archive >> *(U32*)&mClockInactiveState;
-	text_archive >> *(U32*)&mModeState;
 	text_archive >> *(U32*)&mDummyCycles;
 	text_archive >> *(U32*)&mAddressSize;
 
@@ -222,7 +210,6 @@ const char* qspiAnalyzerSettings::SaveSettings()
 	text_archive << mClockChannel;
 	text_archive << mEnableChannel;
 	text_archive << mClockInactiveState;
-	text_archive << mModeState;
 	text_archive << mDummyCycles;
 	text_archive << mAddressSize;
 

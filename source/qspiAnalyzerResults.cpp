@@ -26,22 +26,6 @@ void qspiAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& channel,
 
 	switch (frame.mType)
 	{
-	case FrameTypeCommand:
-		{
-		char number_str[128];
-		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
-
-		AddResultString(number_str);
-
-		std::stringstream ss;
-		ss << "Cmd: " << number_str;
-		AddResultString(ss.str().c_str());
-		ss.str("");
-
-		// ss << "Command: " << number_str << " " << GetQSPICommandAttr(frame.mData1).CommandName;
-		AddResultString(ss.str().c_str());
-		}
-		break;
 	case FrameTypeAddress:
 	{
 		char number_str[128];
@@ -73,21 +57,12 @@ void qspiAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& channel,
 		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
 
 		AddResultString(number_str);
-
-		std::stringstream ss;
-		ss << "Data: " << number_str;
-		AddResultString(ss.str().c_str());
-		ss.str("");
-
-		ss << "Data: " << number_str;
-		AddResultString(ss.str().c_str());
 	}
 	break;
 
 	default:
 		break;
 	}
-
 }
 
 void qspiAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id )
@@ -135,17 +110,6 @@ void qspiAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase
 	
 	switch (frame.mType)
 	{
-	case FrameTypeCommand:
-	{
-		char number_str[128];
-		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
-
-		std::stringstream ss;
-
-		// ss << "Command: " << number_str << " " << GetQSPICommandAttr(frame.mData1).CommandName;
-		// AddTabularText(ss.str().c_str());
-		break;
-	}
 	case FrameTypeAddress:
 	{
 		char number_str[128];
@@ -170,10 +134,10 @@ void qspiAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase
 		char number_str[128];
 		AnalyzerHelpers::GetNumberString(frame.mData1, display_base, 8, number_str, 128);
 
-		// std::stringstream ss;
+		std::stringstream ss;
 
-		// ss << "Data: " << number_str;
-		// AddTabularText(ss.str().c_str());
+		ss << "Data: " << number_str;
+		AddTabularText(ss.str().c_str());
 		break;
 	}
 

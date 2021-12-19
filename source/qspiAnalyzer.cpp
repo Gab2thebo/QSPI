@@ -179,89 +179,37 @@ bool qspiAnalyzer::WouldAdvancingTheClockToggleEnable()
 
 void qspiAnalyzer::GetFrame()
 {
-	// ParseResult currentCommand;
-
-	// CommandAttr currentCommandAttr;
-
-	// // Get Command
-	// switch (mSettings->mModeState) {
-	// case 1 : currentCommand = GetCommand(0x01); //Extended mode
-	// 	break;
-	// case 2 : currentCommand = GetCommand(0x03); //Dual mode
-	// 	break;
-	// case 3 : currentCommand = GetCommand(0x0F); //Quad mode
-	// 	break;
-	// }
-
-	// if(IsParseResultError(currentCommand)) {
-    //     return;
-    // }
-    // else {
-    //     SaveResults(currentCommand, FrameTypeCommand);
-
-    //     if (IsCommandValid(currentCommand.data)==false) { //if command byte is not valid, skip forward to end of active edge
-    //         AdvanceToActiveEnableEdgeWithCorrectClockPolarity();
-    //         return;
-    //     }
-    // }
-
-	// currentCommandAttr = GetQSPICommandAttr(currentCommand.data);
-
-
 	// Get Address
 
-	// if (currentCommandAttr.AcceptsAddr) {
-	// 	ParseResult currentAddress;
+	if (mSettings->mAddressSize > 0) {
+		ParseResult currentAddress;
 
-	// 	switch (mSettings->mModeState) {
-	// 	case 1: currentAddress = GetAddress(currentCommandAttr.AddressLineMask); //Extended mode
-	// 		break;
-	// 	case 2: currentAddress = GetAddress(0x03); //Dual mode
-	// 		break;
-	// 	case 3: currentAddress = GetAddress(0x0F); //Quad mode
-	// 		break;
-	// 	}
-		
+		currentAddress = GetAddress(0x0F); //Quad mode
 
-	// 	if(IsParseResultError(currentAddress)) {
-    //         return;
-	// 	}
-    //     else {
-    //         SaveResults(currentAddress, FrameTypeAddress);
-    //     }
-
-	// }
+		if(IsParseResultError(currentAddress)) {
+            return;
+		}
+        else {
+            SaveResults(currentAddress, FrameTypeAddress);
+        }
+	}
 
 	// Get Dummy bits
-	// if (mSettings->mDummyCycles > 0 ) {
-	// 	if (currentCommandAttr.UsesDummyCycles) {
-	// 		ParseResult currentDummy;
-	// 		currentDummy = GetDummy();
-	// 		if(IsParseResultError(currentDummy)) {
-	// 			return;
-	// 		}
-	// 		else {
-	// 			SaveResults(currentDummy, FrameTypeDummy);
-	// 		}
-
-	// 	}
-	// }
+	if (mSettings->mDummyCycles > 0 ) {		
+		ParseResult currentDummy;
+		currentDummy = GetDummy();
+		if(IsParseResultError(currentDummy)) {
+			return;
+		}
+		else {
+			SaveResults(currentDummy, FrameTypeDummy);
+		}		
+	}
 	
 
 	// Get Data
-	// if (currentCommandAttr.HasData) {
 	for (;;) {
 		ParseResult currentData;
-
-		// currentData = GetData(currentCommandAttr.DataLineMask);
-		// switch (mSettings->mModeState) {
-		// case 1: currentData = GetData(currentCommandAttr.DataLineMask); //Extended mode
-		// 	break;
-		// case 2: currentData = GetData(0x03); //Dual mode
-		// 	break;
-		// case 3: currentData = GetData(0x0F); //Quad mode
-		// 	break;
-		// }
 
 		currentData = GetData(0x0F); //Quad mode
 
@@ -274,6 +222,7 @@ void qspiAnalyzer::GetFrame()
 	}
 	// }
 }
+
 
 qspiAnalyzer::ParseResult qspiAnalyzer::GetDummy()
 {
