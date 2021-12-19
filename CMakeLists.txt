@@ -7,13 +7,12 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(ExternalAnalyzerSDK)
 
 set(SOURCES 
-source/qspiAnalyzer.cpp
-source/qspiAnalyzer.h
-source/qspiAnalyzerResults.cpp
-source/qspiAnalyzerResults.h
-source/qspiAnalyzerSettings.cpp
-source/qspiAnalyzerSettings.h
-
+    source/qspiAnalyzer.cpp
+    source/qspiAnalyzer.h
+    source/qspiAnalyzerResults.cpp
+    source/qspiAnalyzerResults.h
+    source/qspiAnalyzerSettings.cpp
+    source/qspiAnalyzerSettings.h
 )
 
 add_analyzer_plugin(qspi_analyzer SOURCES ${SOURCES})
