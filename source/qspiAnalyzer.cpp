@@ -1,6 +1,5 @@
 #include <AnalyzerChannelData.h>
 #include "qspiAnalyzer.h"
-#include "qspiAnalyzerCommands.h"
 #include "qspiAnalyzerSettings.h"
 #include "AnalyzerHelpers.h"
 

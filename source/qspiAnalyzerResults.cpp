@@ -65,6 +65,7 @@ void qspiAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& channel,
 	}
 }
 
+
 void qspiAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id )
 {
 	std::stringstream ss;
@@ -102,6 +103,7 @@ void qspiAnalyzerResults::GenerateExportFile( const char* file, DisplayBase disp
 	UpdateExportProgressAndCheckForCancel(num_frames, num_frames);
 	AnalyzerHelpers::EndFile(f);
 }
+
 
 void qspiAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
 {
@@ -147,11 +149,13 @@ void qspiAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase
 
 }
 
+
 void qspiAnalyzerResults::GeneratePacketTabularText( U64 packet_id, DisplayBase display_base )
 {
 	ClearResultStrings();
 	AddResultString( "not supported" );
 }
+
 
 void qspiAnalyzerResults::GenerateTransactionTabularText( U64 transaction_id, DisplayBase display_base )
 {
