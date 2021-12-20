@@ -581,12 +581,12 @@ U32 qspiAnalyzer::GetMinimumSampleRateHz()
 
 const char* qspiAnalyzer::GetAnalyzerName() const
 {
-	return "QSPI";
+	return "SR1120 QSPI";
 }
 
 const char* GetAnalyzerName()
 {
-	return "QSPI";
+	return "SR1120 QSPI";
 }
 
 Analyzer* CreateAnalyzer()
